@@ -1,0 +1,1 @@
+<view class="container"><view class="intro">ces。</view><text class="intro">详见：</text><uni-link wx:if="{{a}}" u-i="0278da14-0" bind:__l="__l" u-p="{{a}}"></uni-link></view>
