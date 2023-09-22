@@ -24,7 +24,7 @@ const _sfc_main = {
   mounted() {
     common_vendor.wx$1.login({
       success(res) {
-        console.log(res);
+        console.log(111, res);
         if (res.code) {
           console.log(res.code);
         } else {

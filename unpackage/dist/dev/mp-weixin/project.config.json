@@ -17,9 +17,9 @@
       "outputPath": ""
     }
   },
-  "compileType": "game",
+  "compileType": "miniprogram",
   "libVersion": "3.1.0",
-  "appid": "wx239e6cbde09bb25b",
+  "appid": "wx85a545831eb41026",
   "projectname": "mygame",
   "condition": {},
   "editorSetting": {

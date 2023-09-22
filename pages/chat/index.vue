@@ -46,7 +46,7 @@
 		mounted() {
 			wx.login({
 			  success (res) {
-					console.log(res)
+					console.log(111, res)
 			    if (res.code) {
 						console.log(res.code)
 			      //发起网络请求
