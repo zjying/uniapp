@@ -1,0 +1,40 @@
+/* 水平间距 */
+/* 水平间距 */
+.message.data-v-c4350369 {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.message-header.data-v-c4350369 {
+  width: 45px;
+  height: 45px;
+}
+.message-content.data-v-c4350369 {
+  margin: 0 10px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+}
+.message-content-name.data-v-c4350369 {
+  line-height: 26px;
+  color: #999;
+  width: auto;
+  max-width: 300px;
+  margin-bottom: 5px;
+}
+.message-content-cont.data-v-c4350369 {
+  width: auto;
+  max-width: 300px;
+  background: #f2f2f2;
+  padding: 10px;
+  border-radius: 6px;
+}
+.messagerevise.data-v-c4350369 {
+  flex-direction: row-reverse;
+}
+.messagerevise .message-content.data-v-c4350369 {
+  align-items: flex-end;
+  text-align: right;
+}

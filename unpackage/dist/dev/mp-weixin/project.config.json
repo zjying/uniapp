@@ -17,9 +17,9 @@
       "outputPath": ""
     }
   },
-  "compileType": "miniprogram",
+  "compileType": "game",
   "libVersion": "3.1.0",
-  "appid": "touristappid",
+  "appid": "wx239e6cbde09bb25b",
   "projectname": "mygame",
   "condition": {},
   "editorSetting": {

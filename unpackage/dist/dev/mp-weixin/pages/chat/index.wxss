@@ -1,6 +1,22 @@
-
-.container {
-		padding: 20px;
-		font-size: 14px;
-		line-height: 24px;
+/* 水平间距 */
+/* 水平间距 */
+.chat.data-v-5a559478 {
+  box-sizing: border-box;
+  height: 100vh;
+  background: #fff;
+  overflow: hidden;
+}
+.chat-record.data-v-5a559478 {
+  padding: 20px;
+  height: 85vh;
+  box-sizing: border-box;
+}
+.chat-send.data-v-5a559478 {
+  height: 15vh;
+  border-top: 1px solid #f2f2f2;
+  padding: 15px 20px;
+  box-sizing: border-box;
+}
+.chat .cansend.data-v-5a559478 .content-clear-icon {
+  color: #0cb90c !important;
 }

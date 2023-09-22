@@ -1,0 +1,1 @@
+<view class="message data-v-c4350369"><image class="message-header data-v-c4350369" src="{{a}}" alt="" srcset=""></image><view class="message-content data-v-c4350369"><view class="message-content-name data-v-c4350369">{{b}}</view><text class="message-content-cont data-v-c4350369">{{c}}</text></view></view>
