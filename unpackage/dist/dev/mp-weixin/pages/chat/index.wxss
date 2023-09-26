@@ -10,13 +10,42 @@
   padding: 20px;
   height: 85vh;
   box-sizing: border-box;
+  overflow-y: auto;
 }
 .chat-send.data-v-5a559478 {
-  height: 15vh;
   border-top: 1px solid #f2f2f2;
   padding: 15px 20px;
   box-sizing: border-box;
+  position: fixed;
+  width: 100%;
+  bottom: 5vh;
+  margin-bottom: 10px;
+  background: #fff;
 }
-.chat .cansend.data-v-5a559478 .content-clear-icon {
+.chat-send .input-wrapper.data-v-5a559478 {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+  background: #f2f2f2;
+  border-radius: 6px;
+}
+.chat-send .sendicon.data-v-5a559478 {
+  position: absolute;
+  right: 10px;
+  bottom: calc(50% - 14px);
+}
+.chat-send .active.data-v-5a559478 .uniui-paperplane-filled {
   color: #0cb90c !important;
+}
+.chat-send.data-v-5a559478 input {
+  line-height: 45px;
+  border: 1px solid #f2f2f2;
+  height: 45px;
+  border-radius: 6px;
+  width: 100%;
+  display: inline-block;
+  padding: 0 50px 0 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+  font-size: 16px;
 }
