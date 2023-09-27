@@ -8,6 +8,7 @@
 			</scroll-view>
 			getToken-{{getToken}}
 			code-{{code}}
+			msg-{{msg}}
 		</view>
 		<view
 			class="chat-send"
@@ -48,28 +49,27 @@
 					id: 2
 				}],
 				inputHeight: '',
-				code: ''
+				code: '',
+				getToken: '1',
+				msg: ''
 			}
 		},
 		computed: {
 			heightStyle() {
 				const height = this.inputHeight ? `${this.inputHeight}px` : '10vh'
 				return `bottom: ${height}`
-			},
-			getToken() {
-				return uni.getStorageSync('token')
 			}
 		},
 		mounted() {
 			 wx.onKeyboardHeightChange(res => {
 			   this.inputHeight = res.height
 			 })
-			 const _this = this
+			 // const _this = this
 			 uni.login({ 
 			 	"provider": "weixin",
 			 	"onlyAuthorize": true, // 微信登录仅请求授权认证
-			 	success: function(event){
-					_this.code = event.code
+			 	success: (event) => {
+					this.code = event.code
 					console.log('111')
 			 		//客户端成功获取授权临时票据（code）,向业务服务器发起登录请求。
 			 		uni.request({
@@ -78,33 +78,35 @@
 			 		        code: event.code
 			 		    },
 			 		    success: (res) => {
-								console.log(res.data.data)
+								this.getToken = res.data.data.token
 			 		        //获得token完成登录
 								uni.setStorageSync('token',res.data.data.token)
 			 		    },
 							fail: (err) => {
+								this.msg = `1${JSON.stringify(err)}`
 								console.log('3331', err)
 							}
 			 		});
 			 	},
 			 	fail: function (err) {
-					console.log('2222')
+					this.msg = `2${err}`
+					console.log('2222', err)
 					// 登录授权失败  
 					// err.code是错误码
 				}
 			})
-			uni.authorize({
-			    scope: 'scope.userInfo',
-			    success: (res) => {
-						console.log('authorize', res)
-						uni.getUserInfo({
-							provider: 'weixin',
-							success: function (infoRes) {
-								console.log('用户昵称为：' + infoRes.userInfo.nickName);
-							}
-						});
-			    }
-			})
+			// uni.authorize({
+			//     scope: 'scope.userInfo',
+			//     success: (res) => {
+			// 			console.log('authorize', res)
+			// 			uni.getUserInfo({
+			// 				provider: 'weixin',
+			// 				success: function (infoRes) {
+			// 					console.log('用户昵称为：' + infoRes.userInfo.nickName);
+			// 				}
+			// 			});
+			//     }
+			// })
 		},
 		methods: {
 			sendClick() {
@@ -112,7 +114,7 @@
 				this.messageList.push({
 					name: '张三2',
 					avater: 'rel_1.png',
-					content: this.cont,
+					content: this.cont + this.getToken,
 					id: 3
 				})
 				this.cont = ''
