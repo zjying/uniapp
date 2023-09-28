@@ -10,19 +10,24 @@ const _sfc_main = {
       cont: "",
       messageList: [{
         name: "张三12345",
-        avater: "rel_1.png",
+        avater: "../../static/rel_1.png",
         content: "张三测试张三测试张三测试张三测试张三测试张三测试张三测试张三测试张三测试",
+        self: 0,
         id: 1
       }, {
         name: "张三1",
-        avater: "rel_1.png",
+        avater: "../../static/rel_1.png",
         content: "张三测试333333",
+        self: 0,
         id: 2
       }],
       inputHeight: "",
       code: "",
       getToken: "1",
-      msg: ""
+      msg: "",
+      getUserInfo: {},
+      avatarUrl: "",
+      nickName: ""
     };
   },
   computed: {
@@ -32,6 +37,8 @@ const _sfc_main = {
     }
   },
   mounted() {
+    const wxVersion = common_vendor.wx$1.getSystemInfoSync().version;
+    console.log(wxVersion);
     common_vendor.wx$1.onKeyboardHeightChange((res) => {
       this.inputHeight = res.height;
     });
@@ -60,7 +67,6 @@ const _sfc_main = {
       },
       fail: function(err) {
         this.msg = `2${err}`;
-        console.log("2222", err);
       }
     });
   },
@@ -69,9 +75,10 @@ const _sfc_main = {
       if (!this.cont)
         return;
       this.messageList.push({
-        name: "张三2",
-        avater: "rel_1.png",
-        content: this.cont + this.getToken,
+        name: this.nickName,
+        avater: this.avatarUrl,
+        content: this.cont,
+        self: 1,
         id: 3
       });
       this.cont = "";
@@ -79,20 +86,46 @@ const _sfc_main = {
     confirmClick() {
       this.sendClick();
     },
-    keyboardheightchange(event) {
-      alert(1);
-      alert(event.detail);
+    joinPopup() {
+      this.$refs.popup.open();
+    },
+    chooseAvatar(e) {
+      const { avatarUrl } = e.detail;
+      this.avatarUrl = avatarUrl;
+    },
+    formsubmit(e) {
+      this.nickName = e.detail.value.nickName;
+      if (!this.nickName || !this.avatarUrl) {
+        common_vendor.index.showToast({
+          title: "请填信息",
+          icon: "error",
+          duration: 2e3
+        });
+        return;
+      }
+      common_vendor.index.showToast({
+        title: this.nickName,
+        icon: "success",
+        duration: 2e3
+      });
+      console.log({
+        avatarUrl: this.avatarUrl,
+        nickName: this.nickName
+      });
+      this.$refs.popup.close();
     }
   }
 };
 if (!Array) {
   const _component_message = common_vendor.resolveComponent("message");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  (_component_message + _easycom_uni_icons2)();
+  const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
+  (_component_message + _easycom_uni_icons2 + _easycom_uni_popup2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + _easycom_uni_popup)();
 }
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
@@ -107,16 +140,29 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     b: common_vendor.t($data.getToken),
     c: common_vendor.t($data.code),
     d: common_vendor.t($data.msg),
-    e: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
-    f: $data.cont,
-    g: common_vendor.o(($event) => $data.cont = $event.detail.value),
-    h: common_vendor.n($data.cont.length ? "active" : ""),
-    i: common_vendor.o($options.sendClick),
-    j: common_vendor.p({
+    e: common_vendor.t($data.nickName),
+    f: common_vendor.t($data.avatarUrl),
+    g: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
+    h: $data.cont,
+    i: common_vendor.o(($event) => $data.cont = $event.detail.value),
+    j: common_vendor.n($data.cont.length ? "active" : ""),
+    k: common_vendor.o($options.sendClick),
+    l: common_vendor.p({
       type: "paperplane-filled",
       size: "28"
     }),
-    k: common_vendor.s($options.heightStyle)
+    m: common_vendor.s($options.heightStyle),
+    n: !!$data.nickName,
+    o: common_vendor.o((...args) => $options.joinPopup && $options.joinPopup(...args)),
+    p: !$data.nickName,
+    q: $data.avatarUrl,
+    r: common_vendor.o((...args) => $options.chooseAvatar && $options.chooseAvatar(...args)),
+    s: $data.nickName,
+    t: common_vendor.o((...args) => $options.formsubmit && $options.formsubmit(...args)),
+    v: common_vendor.sr("popup", "5a559478-2"),
+    w: common_vendor.p({
+      type: "bottom"
+    })
   };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-5a559478"], ["__file", "/Users/ajin/Documents/test/uniapp/mygame/pages/chat/index.vue"]]);

@@ -30,6 +30,8 @@
   background: #f2f2f2;
   padding: 10px;
   border-radius: 6px;
+  word-wrap: break-word;
+  word-break: break-all;
 }
 .messagerevise.data-v-c4350369 {
   flex-direction: row-reverse;
@@ -37,4 +39,7 @@
 .messagerevise .message-content.data-v-c4350369 {
   align-items: flex-end;
   text-align: right;
+}
+.messagerevise .message-content-cont.data-v-c4350369 {
+  text-align: left;
 }

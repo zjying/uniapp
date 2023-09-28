@@ -9,10 +9,13 @@
 			getToken-{{getToken}}
 			code-{{code}}
 			msg-{{msg}}
+			nickName - {{ nickName }}
+			avatarUrl- {{avatarUrl}}
 		</view>
 		<view
 			class="chat-send"
-			:style="heightStyle">
+			:style="heightStyle"
+			v-show="!!nickName">
 			<view class="input-wrapper">
 				<input
 					v-model="cont"
@@ -24,6 +27,34 @@
 					<uni-icons :class="['sendicon', cont.length ? 'active' : '']" type="paperplane-filled" size="28" @click="sendClick"></uni-icons> 
 			</view>
 		</view>
+		<view class="" v-show="!nickName">
+			<button class="button" type="primary" @click="joinPopup">
+				<text class="button-text">加入</text>
+			</button>
+		</view>
+		<uni-popup ref="popup" type="bottom">
+			<div class="popup">
+				 <form @submit="formsubmit" ref="formdata">
+					 <button
+						class="popup-avatar"
+						open-type="chooseAvatar"
+						@chooseavatar="chooseAvatar">
+					   <image class="popup-avatar-img" :src="avatarUrl" mode="aspectFit"></image>
+					 </button> 
+					<input
+						type="nickname"
+						placeholder="请输入昵称"
+						name="nickName"
+						class="popup-nickname"
+						:value="nickName"/>
+					<button
+						class="popup-submit"
+						form-type="submit"
+						type="primary"
+						size="mini">确认并加入</button>
+				</form>
+			</div>
+		</uni-popup>
 	</view>
 </template>
 
@@ -39,19 +70,24 @@
 				cont: '',
 				messageList: [{
 					name: '张三12345',
-					avater: 'rel_1.png',
+					avater: '../../static/rel_1.png',
 					content: '张三测试张三测试张三测试张三测试张三测试张三测试张三测试张三测试张三测试',
+					self: 0,
 					id: 1
 				}, {
 					name: '张三1',
-					avater: 'rel_1.png',
+					avater: '../../static/rel_1.png',
 					content: '张三测试333333',
+					self: 0,
 					id: 2
 				}],
 				inputHeight: '',
 				code: '',
 				getToken: '1',
-				msg: ''
+				msg: '',
+				getUserInfo: {},
+				avatarUrl: '',
+				nickName: ''
 			}
 		},
 		computed: {
@@ -61,11 +97,13 @@
 			}
 		},
 		mounted() {
+			const wxVersion = wx.getSystemInfoSync().version;
+			console.log(wxVersion)
 			 wx.onKeyboardHeightChange(res => {
 			   this.inputHeight = res.height
 			 })
 			 // const _this = this
-			 uni.login({ 
+			 uni.login({
 			 	"provider": "weixin",
 			 	"onlyAuthorize": true, // 微信登录仅请求授权认证
 			 	success: (event) => {
@@ -90,31 +128,19 @@
 			 	},
 			 	fail: function (err) {
 					this.msg = `2${err}`
-					console.log('2222', err)
 					// 登录授权失败  
 					// err.code是错误码
 				}
 			})
-			// uni.authorize({
-			//     scope: 'scope.userInfo',
-			//     success: (res) => {
-			// 			console.log('authorize', res)
-			// 			uni.getUserInfo({
-			// 				provider: 'weixin',
-			// 				success: function (infoRes) {
-			// 					console.log('用户昵称为：' + infoRes.userInfo.nickName);
-			// 				}
-			// 			});
-			//     }
-			// })
 		},
 		methods: {
 			sendClick() {
 				if (!this.cont) return
 				this.messageList.push({
-					name: '张三2',
-					avater: 'rel_1.png',
-					content: this.cont + this.getToken,
+					name: this.nickName,
+					avater: this.avatarUrl,
+					content: this.cont,
+					self: 1,
 					id: 3
 				})
 				this.cont = ''
@@ -122,65 +148,38 @@
 			confirmClick() {
 				this.sendClick();
 			},
-			keyboardheightchange (event) {
-				alert(1)
-				alert(event.detail)
+			joinPopup() {
+				this.$refs.popup.open()
+			},
+			chooseAvatar(e) {
+				const { avatarUrl } = e.detail
+				this.avatarUrl = avatarUrl
+			},
+			formsubmit(e) {
+				this.nickName = e.detail.value.nickName
+				if (!this.nickName || !this.avatarUrl) {
+					uni.showToast({
+					 title: "请填信息",
+					 icon: "error",
+					 duration: 2000
+				 })
+					return
+				}
+				uni.showToast({
+					 title: this.nickName,
+					 icon: "success",
+					 duration: 2000
+				 })
+				console.log({
+					avatarUrl: this.avatarUrl,
+					nickName: this.nickName
+				})
+				this.$refs.popup.close()
 			}
 		}
 	}
 </script>
 
 <style lang="scss"  scoped>
-.chat {
-	box-sizing: border-box;
-	height: 100vh;
-	background: #fff;
-	overflow: hidden;
-	&-record {
-		padding: 20px;
-		height: 85vh;
-		box-sizing: border-box;
-		overflow-y: auto;
-	}
-	&-send {
-		border-top: 1px solid #f2f2f2;
-		padding: 15px 20px;
-		box-sizing: border-box;
-		position: fixed;
-		width: 100%;
-		bottom: 5vh;
-		margin-bottom: 10px;
-		background: #fff;
-		.input-wrapper {
-			position: relative;
-			width: 100%;
-			box-sizing: border-box;
-			background: #f2f2f2;
-			border-radius: 6px;
-		}
-		.sendicon {
-			position: absolute;
-			right: 10px;
-			bottom: calc(50% - 14px);
-		}
-		.active {
-			:deep(.uniui-paperplane-filled) {
-				color: #0cb90c !important;
-			}
-		}
-		:deep(input){
-			line-height: 45px;
-			border: 1px solid #f2f2f2;
-			height: 45px;
-			border-radius: 6px;
-			width: 100%;
-			display: inline-block;
-			padding: 0 50px 0 10px;
-			font-size: 14px;
-			box-sizing: border-box;
-			font-size: 16px;
-		}
-	}
-	
-}
+	@import "index.scss";
 </style>

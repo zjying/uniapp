@@ -3,6 +3,7 @@
 .chat.data-v-5a559478 {
   box-sizing: border-box;
   height: 100vh;
+  width: 100vw;
   background: #fff;
   overflow: hidden;
 }
@@ -11,6 +12,9 @@
   height: 85vh;
   box-sizing: border-box;
   overflow-y: auto;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  word-break: break-all;
 }
 .chat-send.data-v-5a559478 {
   border-top: 1px solid #f2f2f2;
@@ -48,4 +52,27 @@
   font-size: 14px;
   box-sizing: border-box;
   font-size: 16px;
+}
+.chat .popup.data-v-5a559478 {
+  height: 60vh;
+  width: 100vw;
+  padding-top: 10vh;
+  box-sizing: border-box;
+  background: #fff;
+  text-align: center;
+}
+.chat .popup-avatar.data-v-5a559478 {
+  width: 20vw;
+  height: 20vw;
+  margin: 20px auto;
+  display: inline-block;
+  padding: 0;
+}
+.chat .popup-avatar-img.data-v-5a559478 {
+  width: 20vw;
+  height: 20vw;
+}
+.chat .popup-submit.data-v-5a559478 {
+  width: 40vw;
+  margin-top: 30px;
 }

@@ -1,6 +1,6 @@
 <template>
-	<view class="message">
-		<img class="message-header" :src="`../../static/${message.avater}`" alt="" srcset="">
+	<view :class="['message', !!message.self ? 'messagerevise' : '']">
+		<image class="message-header" :src="message.avater"></image>
 		<view class="message-content">
 			<view class="message-content-name">{{ message.name }}</view>
 			<text class="message-content-cont">{{ message.content }}</text>
@@ -50,6 +50,8 @@
 				background: #f2f2f2;
 				padding: 10px;
 				border-radius: 6px;
+				word-wrap: break-word;
+				word-break: break-all;
 			}
 			
 		}
@@ -59,6 +61,9 @@
 		.message-content{
 			align-items: flex-end;
 			text-align: right;
+			&-cont {
+				text-align: left;
+			}
 		}
 	}
 </style>
