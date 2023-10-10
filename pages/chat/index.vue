@@ -6,15 +6,10 @@
 					v-for="item in messageList "
 					:message="item" />
 			</scroll-view>
-			getToken-{{getToken}}
-			code-{{code}}
+			getToken-{{token}}
 			msg-{{msg}}
 			nickName - {{ nickName }}
 			avatarUrl- {{avatarUrl}}
-			<button
-				@click="upload">
-				点击上传
-			 </button> 
 		</view>
 		<view
 			class="chat-send"
@@ -87,11 +82,10 @@ import UniappWebSocket from './socket.js';
 					id: 2
 				}],
 				inputHeight: '',
-				code: '',
-				getToken: '1',
 				msg: '',
-				getUserInfo: {},
+				token: '1',
 				avatarUrl: '',
+				userId: '',
 				nickName: '',
 				ws: null
 			}
@@ -112,7 +106,6 @@ import UniappWebSocket from './socket.js';
 			 	"provider": "weixin",
 			 	"onlyAuthorize": true, // 微信登录仅请求授权认证
 			 	success: (event) => {
-					this.code = event.code
 			 		//客户端成功获取授权临时票据（code）,向业务服务器发起登录请求。
 			 		uni.request({
 			 		    url: 'https://mying.vip/eps/login', //仅为示例，并非真实接口地址。
@@ -120,9 +113,12 @@ import UniappWebSocket from './socket.js';
 			 		        code: event.code
 			 		    },
 			 		    success: (res) => {
-								this.getToken = res.data.data.token
+								this.token = res.data.data.token
+								this.avatarUrl = res.data.data.avatarUrl || ''
+								this.userId = res.data.data.id
 			 		        //获得token完成登录
 								uni.setStorageSync('token',res.data.data.token)
+								uni.setStorageSync('userId',res.data.data.id)
 			 		    },
 							fail: (err) => {
 								this.msg = `serve-login：${JSON.stringify(err)}`
@@ -210,6 +206,10 @@ import UniappWebSocket from './socket.js';
 				 })
 					return
 				}
+				// 上传头像
+				this.uploadAvatar()
+				// 上传昵称
+				// 测试
 				uni.showToast({
 					 title: this.nickName,
 					 icon: "success",
@@ -226,25 +226,24 @@ import UniappWebSocket from './socket.js';
 					url: '/pages/index/index'
 				})
 			},
-			upload() {
-					// 上传图片到自己的服务器
-					const fileName = this.avatarUrl.split('/')
-					const url = `http://127.0.0.1:50229/__tmp__/${fileName[fileName.length - 1]}`
-					console.log(url)
-					
-					uni.uploadFile({
-					  url: 'https://mying.vip/eps/upload', // 你自己的服务器接收上传文件的接口
-					  filePath: url, // 本地文件路径，这里直接使用远程图片URL作为路径
-					  name: 'file', // 服务器接收文件的字段名
-					  success: (uploadRes) => {
-					    console.log('上传成功', uploadRes);
-					    // 在这里处理上传成功后的操作
-					  },
-					  fail: (error) => {
-					    console.error('上传失败', error);
-					    // 在这里处理上传失败后的操作
-					  }
-					});
+			uploadAvatar() {
+				uni.uploadFile({
+					url: 'https://mying.vip/eps/upload',
+					filePath: this.avatarUrl,
+					name: 'file',
+					header: {
+						token: this.token,
+						userId: this.userId
+					},
+					success: (uploadRes) => {
+						console.log('上传成功', uploadRes);
+						// 在这里处理上传成功后的操作
+					},
+					fail: (error) => {
+						console.error('上传失败', error);
+						// 在这里处理上传失败后的操作
+					}
+				});
 			},
 			onUnload() {
 				console.log('111beforeDestroy')

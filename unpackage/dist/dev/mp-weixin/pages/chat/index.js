@@ -23,11 +23,10 @@ const _sfc_main = {
         id: 2
       }],
       inputHeight: "",
-      code: "",
-      getToken: "1",
       msg: "",
-      getUserInfo: {},
+      token: "1",
       avatarUrl: "",
+      userId: "",
       nickName: "",
       ws: null
     };
@@ -47,7 +46,6 @@ const _sfc_main = {
       "onlyAuthorize": true,
       // 微信登录仅请求授权认证
       success: (event) => {
-        this.code = event.code;
         common_vendor.index.request({
           url: "https://mying.vip/eps/login",
           //仅为示例，并非真实接口地址。
@@ -55,8 +53,11 @@ const _sfc_main = {
             code: event.code
           },
           success: (res) => {
-            this.getToken = res.data.data.token;
+            this.token = res.data.data.token;
+            this.avatarUrl = res.data.data.avatarUrl || "";
+            this.userId = res.data.data.id;
             common_vendor.index.setStorageSync("token", res.data.data.token);
+            common_vendor.index.setStorageSync("userId", res.data.data.id);
           },
           fail: (err) => {
             this.msg = `serve-login：${JSON.stringify(err)}`;
@@ -140,6 +141,7 @@ const _sfc_main = {
         });
         return;
       }
+      this.uploadAvatar();
       common_vendor.index.showToast({
         title: this.nickName,
         icon: "success",
@@ -156,17 +158,15 @@ const _sfc_main = {
         url: "/pages/index/index"
       });
     },
-    upload() {
-      const fileName = this.avatarUrl.split("/");
-      const url = `http://127.0.0.1:50229/__tmp__/${fileName[fileName.length - 1]}`;
-      console.log(url);
+    uploadAvatar() {
       common_vendor.index.uploadFile({
         url: "https://mying.vip/eps/upload",
-        // 你自己的服务器接收上传文件的接口
-        filePath: url,
-        // 本地文件路径，这里直接使用远程图片URL作为路径
+        filePath: this.avatarUrl,
         name: "file",
-        // 服务器接收文件的字段名
+        header: {
+          token: this.token,
+          userId: this.userId
+        },
         success: (uploadRes) => {
           console.log("上传成功", uploadRes);
         },
@@ -202,31 +202,29 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         })
       };
     }),
-    b: common_vendor.t($data.getToken),
-    c: common_vendor.t($data.code),
-    d: common_vendor.t($data.msg),
-    e: common_vendor.t($data.nickName),
-    f: common_vendor.t($data.avatarUrl),
-    g: common_vendor.o((...args) => $options.upload && $options.upload(...args)),
-    h: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
-    i: $data.cont,
-    j: common_vendor.o(($event) => $data.cont = $event.detail.value),
-    k: common_vendor.n($data.cont.length ? "active" : ""),
-    l: common_vendor.o($options.sendClick),
-    m: common_vendor.p({
+    b: common_vendor.t($data.token),
+    c: common_vendor.t($data.msg),
+    d: common_vendor.t($data.nickName),
+    e: common_vendor.t($data.avatarUrl),
+    f: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
+    g: $data.cont,
+    h: common_vendor.o(($event) => $data.cont = $event.detail.value),
+    i: common_vendor.n($data.cont.length ? "active" : ""),
+    j: common_vendor.o($options.sendClick),
+    k: common_vendor.p({
       type: "paperplane-filled",
       size: "28"
     }),
-    n: common_vendor.s($options.heightStyle),
-    o: !!$data.nickName,
-    p: common_vendor.o((...args) => $options.joinPopup && $options.joinPopup(...args)),
-    q: !$data.nickName,
-    r: $data.avatarUrl,
-    s: common_vendor.o((...args) => $options.chooseAvatar && $options.chooseAvatar(...args)),
-    t: $data.nickName,
-    v: common_vendor.o((...args) => $options.formsubmit && $options.formsubmit(...args)),
-    w: common_vendor.sr("popup", "5a559478-2"),
-    x: common_vendor.p({
+    l: common_vendor.s($options.heightStyle),
+    m: !!$data.nickName,
+    n: common_vendor.o((...args) => $options.joinPopup && $options.joinPopup(...args)),
+    o: !$data.nickName,
+    p: $data.avatarUrl,
+    q: common_vendor.o((...args) => $options.chooseAvatar && $options.chooseAvatar(...args)),
+    r: $data.nickName,
+    s: common_vendor.o((...args) => $options.formsubmit && $options.formsubmit(...args)),
+    t: common_vendor.sr("popup", "5a559478-2"),
+    v: common_vendor.p({
       type: "bottom"
     })
   };
