@@ -163,7 +163,7 @@ const _sfc_main = {
         url: "https://mying.vip/eps/upload",
         filePath: this.avatarUrl,
         name: "file",
-        header: {
+        formData: {
           token: this.token,
           userId: this.userId
         },
