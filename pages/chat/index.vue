@@ -231,9 +231,12 @@ import UniappWebSocket from './socket.js';
 					url: 'https://mying.vip/eps/upload',
 					filePath: this.avatarUrl,
 					name: 'file',
-					formData: {
+					header: {
 						token: this.token,
-						userId: this.userId
+					},
+					formData: {
+						userId: this.userId,
+						nickname: this.nickName
 					},
 					success: (uploadRes) => {
 						console.log('上传成功', uploadRes);

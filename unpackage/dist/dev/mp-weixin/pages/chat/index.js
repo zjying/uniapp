@@ -163,9 +163,12 @@ const _sfc_main = {
         url: "https://mying.vip/eps/upload",
         filePath: this.avatarUrl,
         name: "file",
+        header: {
+          token: this.token
+        },
         formData: {
-          token: this.token,
-          userId: this.userId
+          userId: this.userId,
+          nickname: this.nickName
         },
         success: (uploadRes) => {
           console.log("上传成功", uploadRes);
