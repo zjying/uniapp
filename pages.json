@@ -1,13 +1,13 @@
 {
 	"pages": [{
-	// 	"path": "pages/index/index",
-	// 	"style": {
-	// 		"navigationBarTitleText": "uni-app"
-	// 	}
-	// }, {
 		"path": "pages/chat/index",
 		"style": {
 			"navigationBarTitleText": "chat"
+		}
+	}, {
+		"path": "pages/index/index",
+		"style": {
+			"navigationBarTitleText": "uni-app"
 		}
 	}],
 	"globalStyle": {

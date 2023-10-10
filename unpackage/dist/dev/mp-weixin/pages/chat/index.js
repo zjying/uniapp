@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const pages_chat_socket = require("./socket.js");
 const message = () => "./message.js";
 const _sfc_main = {
   components: {
@@ -27,7 +28,8 @@ const _sfc_main = {
       msg: "",
       getUserInfo: {},
       avatarUrl: "",
-      nickName: ""
+      nickName: "",
+      ws: null
     };
   },
   computed: {
@@ -37,8 +39,6 @@ const _sfc_main = {
     }
   },
   mounted() {
-    const wxVersion = common_vendor.wx$1.getSystemInfoSync().version;
-    console.log(wxVersion);
     common_vendor.wx$1.onKeyboardHeightChange((res) => {
       this.inputHeight = res.height;
     });
@@ -48,7 +48,6 @@ const _sfc_main = {
       // 微信登录仅请求授权认证
       success: (event) => {
         this.code = event.code;
-        console.log("111");
         common_vendor.index.request({
           url: "https://mying.vip/eps/login",
           //仅为示例，并非真实接口地址。
@@ -60,39 +59,77 @@ const _sfc_main = {
             common_vendor.index.setStorageSync("token", res.data.data.token);
           },
           fail: (err) => {
-            this.msg = `1${JSON.stringify(err)}`;
-            console.log("3331", err);
+            this.msg = `serve-login：${JSON.stringify(err)}`;
           }
         });
       },
       fail: function(err) {
-        this.msg = `2${err}`;
+        this.msg = `wx-login：${err}`;
       }
     });
+    this.getHistory();
+    this.initWs();
   },
   methods: {
+    getHistory() {
+      common_vendor.index.request({
+        url: "https://mying.vip/eps/chat/history",
+        //仅为示例，并非真实接口地址。
+        method: "POST",
+        data: {
+          roomId: 123
+        },
+        success: (res) => {
+          this.messageList = res.data.data;
+        },
+        fail: (err) => {
+          this.msg = `history：${JSON.stringify(err)}`;
+        }
+      });
+    },
+    initWs() {
+      this.ws = new pages_chat_socket.UniappWebSocket(`ws://mying.vip/eps/ws?room=123`);
+      this.ws.on("open", () => {
+        console.log("WebSocket连接已打开");
+      });
+      this.ws.on("message", (data) => {
+        console.log("收到消息:", data);
+        this.messageList.push({
+          name: this.nickName,
+          avater: this.avatarUrl,
+          content: data,
+          self: 1,
+          id: 1
+        });
+      });
+      this.ws.on("error", (error) => {
+        console.log("发生错误:", error);
+      });
+    },
     sendClick() {
       if (!this.cont)
         return;
-      this.messageList.push({
-        name: this.nickName,
-        avater: this.avatarUrl,
-        content: this.cont,
-        self: 1,
-        id: 3
+      this.ws.sendMessage({
+        roomId: 123,
+        senderId: 1,
+        content: this.cont
       });
       this.cont = "";
     },
+    // 输入法的确认发送
     confirmClick() {
       this.sendClick();
     },
+    // 首次进入，系统无昵称头像时，进行获取
     joinPopup() {
       this.$refs.popup.open();
     },
+    // 选择头像
     chooseAvatar(e) {
       const { avatarUrl } = e.detail;
       this.avatarUrl = avatarUrl;
     },
+    // 获取昵称
     formsubmit(e) {
       this.nickName = e.detail.value.nickName;
       if (!this.nickName || !this.avatarUrl) {
@@ -113,6 +150,34 @@ const _sfc_main = {
         nickName: this.nickName
       });
       this.$refs.popup.close();
+    },
+    toNext() {
+      common_vendor.index.redirectTo({
+        url: "/pages/index/index"
+      });
+    },
+    upload() {
+      const fileName = this.avatarUrl.split("/");
+      const url = `http://127.0.0.1:50229/__tmp__/${fileName[fileName.length - 1]}`;
+      console.log(url);
+      common_vendor.index.uploadFile({
+        url: "https://mying.vip/eps/upload",
+        // 你自己的服务器接收上传文件的接口
+        filePath: url,
+        // 本地文件路径，这里直接使用远程图片URL作为路径
+        name: "file",
+        // 服务器接收文件的字段名
+        success: (uploadRes) => {
+          console.log("上传成功", uploadRes);
+        },
+        fail: (error) => {
+          console.error("上传失败", error);
+        }
+      });
+    },
+    onUnload() {
+      console.log("111beforeDestroy");
+      this.ws.close();
     }
   }
 };
@@ -142,25 +207,26 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     d: common_vendor.t($data.msg),
     e: common_vendor.t($data.nickName),
     f: common_vendor.t($data.avatarUrl),
-    g: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
-    h: $data.cont,
-    i: common_vendor.o(($event) => $data.cont = $event.detail.value),
-    j: common_vendor.n($data.cont.length ? "active" : ""),
-    k: common_vendor.o($options.sendClick),
-    l: common_vendor.p({
+    g: common_vendor.o((...args) => $options.upload && $options.upload(...args)),
+    h: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
+    i: $data.cont,
+    j: common_vendor.o(($event) => $data.cont = $event.detail.value),
+    k: common_vendor.n($data.cont.length ? "active" : ""),
+    l: common_vendor.o($options.sendClick),
+    m: common_vendor.p({
       type: "paperplane-filled",
       size: "28"
     }),
-    m: common_vendor.s($options.heightStyle),
-    n: !!$data.nickName,
-    o: common_vendor.o((...args) => $options.joinPopup && $options.joinPopup(...args)),
-    p: !$data.nickName,
-    q: $data.avatarUrl,
-    r: common_vendor.o((...args) => $options.chooseAvatar && $options.chooseAvatar(...args)),
-    s: $data.nickName,
-    t: common_vendor.o((...args) => $options.formsubmit && $options.formsubmit(...args)),
-    v: common_vendor.sr("popup", "5a559478-2"),
-    w: common_vendor.p({
+    n: common_vendor.s($options.heightStyle),
+    o: !!$data.nickName,
+    p: common_vendor.o((...args) => $options.joinPopup && $options.joinPopup(...args)),
+    q: !$data.nickName,
+    r: $data.avatarUrl,
+    s: common_vendor.o((...args) => $options.chooseAvatar && $options.chooseAvatar(...args)),
+    t: $data.nickName,
+    v: common_vendor.o((...args) => $options.formsubmit && $options.formsubmit(...args)),
+    w: common_vendor.sr("popup", "5a559478-2"),
+    x: common_vendor.p({
       type: "bottom"
     })
   };

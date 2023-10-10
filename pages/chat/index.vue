@@ -11,6 +11,10 @@
 			msg-{{msg}}
 			nickName - {{ nickName }}
 			avatarUrl- {{avatarUrl}}
+			<button
+				@click="upload">
+				点击上传
+			 </button> 
 		</view>
 		<view
 			class="chat-send"
@@ -59,7 +63,8 @@
 </template>
 
 <script>
-	import message from './message.vue'
+import message from './message.vue'
+import UniappWebSocket from './socket.js';
 
 	export default {
 		components:{
@@ -87,7 +92,8 @@
 				msg: '',
 				getUserInfo: {},
 				avatarUrl: '',
-				nickName: ''
+				nickName: '',
+				ws: null
 			}
 		},
 		computed: {
@@ -97,18 +103,16 @@
 			}
 		},
 		mounted() {
-			const wxVersion = wx.getSystemInfoSync().version;
-			console.log(wxVersion)
+			// 点击输入时，控制输入框高度
 			 wx.onKeyboardHeightChange(res => {
 			   this.inputHeight = res.height
 			 })
-			 // const _this = this
+			 // 微信登录获取token
 			 uni.login({
 			 	"provider": "weixin",
 			 	"onlyAuthorize": true, // 微信登录仅请求授权认证
 			 	success: (event) => {
 					this.code = event.code
-					console.log('111')
 			 		//客户端成功获取授权临时票据（code）,向业务服务器发起登录请求。
 			 		uni.request({
 			 		    url: 'https://mying.vip/eps/login', //仅为示例，并非真实接口地址。
@@ -121,40 +125,81 @@
 								uni.setStorageSync('token',res.data.data.token)
 			 		    },
 							fail: (err) => {
-								this.msg = `1${JSON.stringify(err)}`
-								console.log('3331', err)
+								this.msg = `serve-login：${JSON.stringify(err)}`
 							}
 			 		});
 			 	},
 			 	fail: function (err) {
-					this.msg = `2${err}`
-					// 登录授权失败  
-					// err.code是错误码
+					// 登录授权失败
+					this.msg = `wx-login：${err}`
 				}
 			})
+			this.getHistory()
+			this.initWs()
 		},
 		methods: {
+			getHistory() {
+				//客户端成功获取授权临时票据（code）,向业务服务器发起登录请求。
+				uni.request({
+						url: 'https://mying.vip/eps/chat/history', //仅为示例，并非真实接口地址。
+						method: 'POST',
+						data: {
+								roomId: 123
+						},
+						success: (res) => {
+							this.messageList = res.data.data
+						},
+						fail: (err) => {
+							this.msg = `history：${JSON.stringify(err)}`
+						}
+				});
+			},
+			initWs() {
+				// 使用示例
+				this.ws = new UniappWebSocket(`ws://mying.vip/eps/ws?room=123`);
+				
+				this.ws.on('open', () => {
+				  console.log('WebSocket连接已打开');
+				});
+				
+				this.ws.on('message', (data) => {
+				  console.log('收到消息:', data);
+					this.messageList.push({
+						name: this.nickName,
+						avater: this.avatarUrl,
+						content: data,
+						self: 1,
+						id: 1
+					})
+				});
+				
+				this.ws.on('error', (error) => {
+				  console.log('发生错误:', error);
+				});
+			},
 			sendClick() {
 				if (!this.cont) return
-				this.messageList.push({
-					name: this.nickName,
-					avater: this.avatarUrl,
-					content: this.cont,
-					self: 1,
-					id: 3
+				this.ws.sendMessage({
+					roomId: 123,
+					senderId: 1,
+					content: this.cont
 				})
 				this.cont = ''
 			},
+			// 输入法的确认发送
 			confirmClick() {
 				this.sendClick();
 			},
+			// 首次进入，系统无昵称头像时，进行获取
 			joinPopup() {
 				this.$refs.popup.open()
 			},
+			// 选择头像
 			chooseAvatar(e) {
 				const { avatarUrl } = e.detail
 				this.avatarUrl = avatarUrl
 			},
+			// 获取昵称
 			formsubmit(e) {
 				this.nickName = e.detail.value.nickName
 				if (!this.nickName || !this.avatarUrl) {
@@ -175,6 +220,35 @@
 					nickName: this.nickName
 				})
 				this.$refs.popup.close()
+			},
+			toNext() {
+				uni.redirectTo({
+					url: '/pages/index/index'
+				})
+			},
+			upload() {
+					// 上传图片到自己的服务器
+					const fileName = this.avatarUrl.split('/')
+					const url = `http://127.0.0.1:50229/__tmp__/${fileName[fileName.length - 1]}`
+					console.log(url)
+					
+					uni.uploadFile({
+					  url: 'https://mying.vip/eps/upload', // 你自己的服务器接收上传文件的接口
+					  filePath: url, // 本地文件路径，这里直接使用远程图片URL作为路径
+					  name: 'file', // 服务器接收文件的字段名
+					  success: (uploadRes) => {
+					    console.log('上传成功', uploadRes);
+					    // 在这里处理上传成功后的操作
+					  },
+					  fail: (error) => {
+					    console.error('上传失败', error);
+					    // 在这里处理上传失败后的操作
+					  }
+					});
+			},
+			onUnload() {
+				console.log('111beforeDestroy')
+				this.ws.close();
 			}
 		}
 	}

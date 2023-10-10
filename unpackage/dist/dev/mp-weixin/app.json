@@ -1,6 +1,7 @@
 {
   "pages": [
-    "pages/chat/index"
+    "pages/chat/index",
+    "pages/index/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",

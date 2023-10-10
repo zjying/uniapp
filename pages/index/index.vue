@@ -1,7 +1,7 @@
 <template>
 	<view class="container">
 		<view class="intro">ces。</view>
-		<text class="intro">详见44444：</text>
+		<text class="intro">详见666：</text>
 		<uni-link :href="href" :text="href"></uni-link>
 	</view>
 </template>
