@@ -1,8 +1,8 @@
 <template>
-	<view :class="['message', !!message.self ? 'messagerevise' : '']">
-		<image class="message-header" :src="message.avater"></image>
+	<view :class="['message', +message.senderId === +userId ? 'messagerevise' : '']">
+		<image class="message-header" :src="message.photoPath"></image>
 		<view class="message-content">
-			<view class="message-content-name">{{ message.name }}</view>
+			<view class="message-content-name">{{ message.nickname }}</view>
 			<text class="message-content-cont">{{ message.content }}</text>
 		</view>
 	</view>
@@ -15,6 +15,11 @@
 				type: Object,
 				default: {}
 			},
+		},
+		computed: {
+			userId() {
+				return uni.getStorageSync('userId') || ''
+			}
 		}
 	}
 </script>

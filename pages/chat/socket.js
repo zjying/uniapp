@@ -1,3 +1,10 @@
+/*
+ * @Author: zhangjinying
+ * @Date: 2023-10-09 14:59:58
+ * @LastEditors: zhangjinying
+ * @LastEditTime: 2023-10-17 16:13:07
+ * @Description: 
+ */
 class UniappWebSocket {
   constructor(url) {
 		if (UniappWebSocket.instance) {
@@ -44,7 +51,6 @@ class UniappWebSocket {
   }
 
   sendMessage(message) {
-		console.log('sendMessage', message, this.isOpen)
     if (this.socket && this.isOpen) {
       this.socket.send({
         data: JSON.stringify(message)

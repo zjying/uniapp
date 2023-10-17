@@ -38,7 +38,6 @@ class UniappWebSocket {
     });
   }
   sendMessage(message) {
-    console.log("sendMessage", message, this.isOpen);
     if (this.socket && this.isOpen) {
       this.socket.send({
         data: JSON.stringify(message)

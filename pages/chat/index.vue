@@ -6,15 +6,11 @@
 					v-for="item in messageList "
 					:message="item" />
 			</scroll-view>
-			getToken-{{token}}
-			msg-{{msg}}
-			nickName - {{ nickName }}
-			avatarUrl- {{avatarUrl}}
 		</view>
 		<view
 			class="chat-send"
 			:style="heightStyle"
-			v-show="!!nickName">
+			v-show="!!avatarUrl">
 			<view class="input-wrapper">
 				<input
 					v-model="cont"
@@ -26,7 +22,7 @@
 					<uni-icons :class="['sendicon', cont.length ? 'active' : '']" type="paperplane-filled" size="28" @click="sendClick"></uni-icons> 
 			</view>
 		</view>
-		<view class="" v-show="!nickName">
+		<view class="" v-show="!avatarUrl">
 			<button class="button" type="primary" @click="joinPopup">
 				<text class="button-text">加入</text>
 			</button>
@@ -58,8 +54,9 @@
 </template>
 
 <script>
-import message from './message.vue'
+import message from './message'
 import UniappWebSocket from './socket.js';
+import configs from '@/configs/index.js';
 
 	export default {
 		components:{
@@ -68,19 +65,7 @@ import UniappWebSocket from './socket.js';
 		data() {
 			return {
 				cont: '',
-				messageList: [{
-					name: '张三12345',
-					avater: '../../static/rel_1.png',
-					content: '张三测试张三测试张三测试张三测试张三测试张三测试张三测试张三测试张三测试',
-					self: 0,
-					id: 1
-				}, {
-					name: '张三1',
-					avater: '../../static/rel_1.png',
-					content: '张三测试333333',
-					self: 0,
-					id: 2
-				}],
+				messageList: [],
 				inputHeight: '',
 				msg: '',
 				token: '1',
@@ -97,6 +82,7 @@ import UniappWebSocket from './socket.js';
 			}
 		},
 		mounted() {
+			console.log(configs)
 			// 点击输入时，控制输入框高度
 			 wx.onKeyboardHeightChange(res => {
 			   this.inputHeight = res.height
@@ -108,14 +94,15 @@ import UniappWebSocket from './socket.js';
 			 	success: (event) => {
 			 		//客户端成功获取授权临时票据（code）,向业务服务器发起登录请求。
 			 		uni.request({
-			 		    url: 'https://mying.vip/eps/login', //仅为示例，并非真实接口地址。
+			 		    url: `${configs.api_location}/eps/login`, //仅为示例，并非真实接口地址。
 			 		    data: {
 			 		        code: event.code
 			 		    },
 			 		    success: (res) => {
 								this.token = res.data.data.token
-								this.avatarUrl = res.data.data.avatarUrl || ''
+								this.avatarUrl = res.data.data.photoPath || ''
 								this.userId = res.data.data.id
+								this.nickName = res.data.data.name || ''
 			 		        //获得token完成登录
 								uni.setStorageSync('token',res.data.data.token)
 								uni.setStorageSync('userId',res.data.data.id)
@@ -137,7 +124,7 @@ import UniappWebSocket from './socket.js';
 			getHistory() {
 				//客户端成功获取授权临时票据（code）,向业务服务器发起登录请求。
 				uni.request({
-						url: 'https://mying.vip/eps/chat/history', //仅为示例，并非真实接口地址。
+						url: `${configs.api_location}/eps/chat/history`, //仅为示例，并非真实接口地址。
 						method: 'POST',
 						data: {
 								roomId: 123
@@ -152,21 +139,24 @@ import UniappWebSocket from './socket.js';
 			},
 			initWs() {
 				// 使用示例
-				this.ws = new UniappWebSocket(`ws://mying.vip/eps/ws?room=123`);
+				this.ws = new UniappWebSocket(`${configs.ws_location}/eps/ws?room=123`);
 				
 				this.ws.on('open', () => {
 				  console.log('WebSocket连接已打开');
 				});
 				
-				this.ws.on('message', (data) => {
-				  console.log('收到消息:', data);
-					this.messageList.push({
-						name: this.nickName,
-						avater: this.avatarUrl,
-						content: data,
-						self: 1,
-						id: 1
-					})
+				this.ws.on('message', (jsonData) => {
+				  console.log('收到消息:', jsonData);
+					const { data, event} = JSON.parse(jsonData)
+					if (event === 'prompt') {
+						uni.showToast({
+							title: data.content,
+							icon: "success",
+							duration: 2000
+						})
+					} else if(event === 'sendMessage') {
+						this.messageList.push(data)
+					}
 				});
 				
 				this.ws.on('error', (error) => {
@@ -177,7 +167,7 @@ import UniappWebSocket from './socket.js';
 				if (!this.cont) return
 				this.ws.sendMessage({
 					roomId: 123,
-					senderId: 1,
+					senderId: this.userId,
 					content: this.cont
 				})
 				this.cont = ''
@@ -228,7 +218,7 @@ import UniappWebSocket from './socket.js';
 			},
 			uploadAvatar() {
 				uni.uploadFile({
-					url: 'https://mying.vip/eps/upload',
+					url: `${configs.api_location}/eps/upload`,
 					filePath: this.avatarUrl,
 					name: 'file',
 					header: {

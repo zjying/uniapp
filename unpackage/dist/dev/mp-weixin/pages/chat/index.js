@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const pages_chat_socket = require("./socket.js");
+const configs_index = require("../../configs/index.js");
 const message = () => "./message.js";
 const _sfc_main = {
   components: {
@@ -9,19 +10,7 @@ const _sfc_main = {
   data() {
     return {
       cont: "",
-      messageList: [{
-        name: "张三12345",
-        avater: "../../static/rel_1.png",
-        content: "张三测试张三测试张三测试张三测试张三测试张三测试张三测试张三测试张三测试",
-        self: 0,
-        id: 1
-      }, {
-        name: "张三1",
-        avater: "../../static/rel_1.png",
-        content: "张三测试333333",
-        self: 0,
-        id: 2
-      }],
+      messageList: [],
       inputHeight: "",
       msg: "",
       token: "1",
@@ -38,6 +27,7 @@ const _sfc_main = {
     }
   },
   mounted() {
+    console.log(configs_index.configs);
     common_vendor.wx$1.onKeyboardHeightChange((res) => {
       this.inputHeight = res.height;
     });
@@ -47,15 +37,16 @@ const _sfc_main = {
       // 微信登录仅请求授权认证
       success: (event) => {
         common_vendor.index.request({
-          url: "https://mying.vip/eps/login",
+          url: `${configs_index.configs.api_location}/eps/login`,
           //仅为示例，并非真实接口地址。
           data: {
             code: event.code
           },
           success: (res) => {
             this.token = res.data.data.token;
-            this.avatarUrl = res.data.data.avatarUrl || "";
+            this.avatarUrl = res.data.data.photoPath || "";
             this.userId = res.data.data.id;
+            this.nickName = res.data.data.name || "";
             common_vendor.index.setStorageSync("token", res.data.data.token);
             common_vendor.index.setStorageSync("userId", res.data.data.id);
           },
@@ -74,7 +65,7 @@ const _sfc_main = {
   methods: {
     getHistory() {
       common_vendor.index.request({
-        url: "https://mying.vip/eps/chat/history",
+        url: `${configs_index.configs.api_location}/eps/chat/history`,
         //仅为示例，并非真实接口地址。
         method: "POST",
         data: {
@@ -89,19 +80,22 @@ const _sfc_main = {
       });
     },
     initWs() {
-      this.ws = new pages_chat_socket.UniappWebSocket(`ws://mying.vip/eps/ws?room=123`);
+      this.ws = new pages_chat_socket.UniappWebSocket(`${configs_index.configs.ws_location}/eps/ws?room=123`);
       this.ws.on("open", () => {
         console.log("WebSocket连接已打开");
       });
-      this.ws.on("message", (data) => {
-        console.log("收到消息:", data);
-        this.messageList.push({
-          name: this.nickName,
-          avater: this.avatarUrl,
-          content: data,
-          self: 1,
-          id: 1
-        });
+      this.ws.on("message", (jsonData) => {
+        console.log("收到消息:", jsonData);
+        const { data, event } = JSON.parse(jsonData);
+        if (event === "prompt") {
+          common_vendor.index.showToast({
+            title: data.content,
+            icon: "success",
+            duration: 2e3
+          });
+        } else if (event === "sendMessage") {
+          this.messageList.push(data);
+        }
       });
       this.ws.on("error", (error) => {
         console.log("发生错误:", error);
@@ -112,7 +106,7 @@ const _sfc_main = {
         return;
       this.ws.sendMessage({
         roomId: 123,
-        senderId: 1,
+        senderId: this.userId,
         content: this.cont
       });
       this.cont = "";
@@ -160,7 +154,7 @@ const _sfc_main = {
     },
     uploadAvatar() {
       common_vendor.index.uploadFile({
-        url: "https://mying.vip/eps/upload",
+        url: `${configs_index.configs.api_location}/eps/upload`,
         filePath: this.avatarUrl,
         name: "file",
         header: {
@@ -205,29 +199,25 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         })
       };
     }),
-    b: common_vendor.t($data.token),
-    c: common_vendor.t($data.msg),
-    d: common_vendor.t($data.nickName),
-    e: common_vendor.t($data.avatarUrl),
-    f: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
-    g: $data.cont,
-    h: common_vendor.o(($event) => $data.cont = $event.detail.value),
-    i: common_vendor.n($data.cont.length ? "active" : ""),
-    j: common_vendor.o($options.sendClick),
-    k: common_vendor.p({
+    b: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
+    c: $data.cont,
+    d: common_vendor.o(($event) => $data.cont = $event.detail.value),
+    e: common_vendor.n($data.cont.length ? "active" : ""),
+    f: common_vendor.o($options.sendClick),
+    g: common_vendor.p({
       type: "paperplane-filled",
       size: "28"
     }),
-    l: common_vendor.s($options.heightStyle),
-    m: !!$data.nickName,
-    n: common_vendor.o((...args) => $options.joinPopup && $options.joinPopup(...args)),
-    o: !$data.nickName,
-    p: $data.avatarUrl,
-    q: common_vendor.o((...args) => $options.chooseAvatar && $options.chooseAvatar(...args)),
-    r: $data.nickName,
-    s: common_vendor.o((...args) => $options.formsubmit && $options.formsubmit(...args)),
-    t: common_vendor.sr("popup", "5a559478-2"),
-    v: common_vendor.p({
+    h: common_vendor.s($options.heightStyle),
+    i: !!$data.avatarUrl,
+    j: common_vendor.o((...args) => $options.joinPopup && $options.joinPopup(...args)),
+    k: !$data.avatarUrl,
+    l: $data.avatarUrl,
+    m: common_vendor.o((...args) => $options.chooseAvatar && $options.chooseAvatar(...args)),
+    n: $data.nickName,
+    o: common_vendor.o((...args) => $options.formsubmit && $options.formsubmit(...args)),
+    p: common_vendor.sr("popup", "5a559478-2"),
+    q: common_vendor.p({
       type: "bottom"
     })
   };
