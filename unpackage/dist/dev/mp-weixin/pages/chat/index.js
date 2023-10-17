@@ -22,7 +22,7 @@ const _sfc_main = {
   },
   computed: {
     heightStyle() {
-      const height = this.inputHeight ? `${this.inputHeight}px` : "10vh";
+      const height = this.inputHeight ? `${this.inputHeight}px` : "3vh";
       return `bottom: ${height}`;
     }
   },
@@ -102,6 +102,7 @@ const _sfc_main = {
       });
     },
     sendClick() {
+      console.log(this.cont);
       if (!this.cont)
         return;
       this.ws.sendMessage({
@@ -171,6 +172,10 @@ const _sfc_main = {
           console.error("上传失败", error);
         }
       });
+    },
+    scrollToBottom() {
+      const container = document.getElementById("container");
+      container.scrollIntoView(false);
     },
     onUnload() {
       console.log("111beforeDestroy");

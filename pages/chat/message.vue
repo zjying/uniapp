@@ -1,8 +1,15 @@
+<!--
+ * @Author: zhangjinying
+ * @Date: 2023-09-22 11:09:58
+ * @LastEditors: zhangjinying
+ * @LastEditTime: 2023-10-17 16:38:46
+ * @Description: 
+-->
 <template>
 	<view :class="['message', +message.senderId === +userId ? 'messagerevise' : '']">
 		<image class="message-header" :src="message.photoPath"></image>
 		<view class="message-content">
-			<view class="message-content-name">{{ message.nickname }}</view>
+			<view class="message-content-name">{{ message.nickname }} - {{ message.timestamp.replace('T0', ' ') }}</view>
 			<text class="message-content-cont">{{ message.content }}</text>
 		</view>
 	</view>

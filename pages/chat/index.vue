@@ -77,7 +77,7 @@ import configs from '@/configs/index.js';
 		},
 		computed: {
 			heightStyle() {
-				const height = this.inputHeight ? `${this.inputHeight}px` : '10vh'
+				const height = this.inputHeight ? `${this.inputHeight}px` : '3vh'
 				return `bottom: ${height}`
 			}
 		},
@@ -164,6 +164,7 @@ import configs from '@/configs/index.js';
 				});
 			},
 			sendClick() {
+				console.log(this.cont)
 				if (!this.cont) return
 				this.ws.sendMessage({
 					roomId: 123,
@@ -237,6 +238,10 @@ import configs from '@/configs/index.js';
 						// 在这里处理上传失败后的操作
 					}
 				});
+			},
+			scrollToBottom() {
+				const container = document.getElementById('container'); // 替换为你的容器元素ID
+				container.scrollIntoView(false);
 			},
 			onUnload() {
 				console.log('111beforeDestroy')
