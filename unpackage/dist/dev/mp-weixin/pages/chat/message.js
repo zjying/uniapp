@@ -17,7 +17,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
     a: $props.message.photoPath,
     b: common_vendor.t($props.message.nickname),
-    c: common_vendor.t($props.message.timestamp.replace("T0", " ")),
+    c: common_vendor.t($props.message.timestamp.replace(/.\d{3}Z/, "").replace("T0", " ")),
     d: common_vendor.t($props.message.content),
     e: common_vendor.n(+$props.message.senderId === +$options.userId ? "messagerevise" : "")
   };

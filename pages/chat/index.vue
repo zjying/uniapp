@@ -1,7 +1,7 @@
 <template>
-	<view class="chat">
-		<view class="chat-record">
-			<scroll-view class="scroll-view_H" scroll-y="true">
+	<view class="chat" v-show="userId">
+		<view class="chat-record" id="record">
+			<scroll-view class="scroll-view_H" :scroll-top="scrollTop"  scroll-y="true" @scroll="scroll">
 				<message
 					v-for="item in messageList "
 					:message="item" />
@@ -72,7 +72,10 @@ import configs from '@/configs/index.js';
 				avatarUrl: '',
 				userId: '',
 				nickName: '',
-				ws: null
+				ws: null,
+				scrollTop: 0,
+				oldScrollTop: 0,
+				wsStatus: false
 			}
 		},
 		computed: {
@@ -99,6 +102,14 @@ import configs from '@/configs/index.js';
 			 		        code: event.code
 			 		    },
 			 		    success: (res) => {
+								if (!res.data || !res.data.data || !res.data.data.token) {
+									uni.showToast({
+										title: "登录失败",
+										icon: "error",
+										duration: 2000
+									})
+									return
+								}
 								this.token = res.data.data.token
 								this.avatarUrl = res.data.data.photoPath || ''
 								this.userId = res.data.data.id
@@ -106,6 +117,8 @@ import configs from '@/configs/index.js';
 			 		        //获得token完成登录
 								uni.setStorageSync('token',res.data.data.token)
 								uni.setStorageSync('userId',res.data.data.id)
+
+								this.initWs()
 			 		    },
 							fail: (err) => {
 								this.msg = `serve-login：${JSON.stringify(err)}`
@@ -118,7 +131,6 @@ import configs from '@/configs/index.js';
 				}
 			})
 			this.getHistory()
-			this.initWs()
 		},
 		methods: {
 			getHistory() {
@@ -131,6 +143,7 @@ import configs from '@/configs/index.js';
 						},
 						success: (res) => {
 							this.messageList = res.data.data
+							this.goTop()
 						},
 						fail: (err) => {
 							this.msg = `history：${JSON.stringify(err)}`
@@ -139,7 +152,7 @@ import configs from '@/configs/index.js';
 			},
 			initWs() {
 				// 使用示例
-				this.ws = new UniappWebSocket(`${configs.ws_location}/eps/ws?room=123`);
+				this.ws = new UniappWebSocket(`${configs.ws_location}/eps/ws?room=123&id=${this.userId}`);
 				
 				this.ws.on('open', () => {
 				  console.log('WebSocket连接已打开');
@@ -154,22 +167,39 @@ import configs from '@/configs/index.js';
 							icon: "success",
 							duration: 2000
 						})
+						this.wsStatus = true
 					} else if(event === 'sendMessage') {
 						this.messageList.push(data)
+						this.goTop()
 					}
 				});
-				
+				this.ws.on('close', (error) => {
+				  console.log('发生错误:', error);
+					this.wsStatus = false
+					uni.showToast({
+						title: "断开了",
+						icon: "error",
+						duration: 3000
+					})
+				});
 				this.ws.on('error', (error) => {
 				  console.log('发生错误:', error);
+					this.wsStatus = false
 				});
 			},
 			sendClick() {
-				console.log(this.cont)
-				if (!this.cont) return
+				// if (!this.cont) return
+				if (!this.wsStatus) {
+					uni.showToast({
+						title: "断开了,只能刷新了...",
+						icon: "error",
+						duration: 3000
+					})
+				}
 				this.ws.sendMessage({
 					roomId: 123,
 					senderId: this.userId,
-					content: this.cont
+					content: this.cont || '没有识别'
 				})
 				this.cont = ''
 			},
@@ -239,9 +269,15 @@ import configs from '@/configs/index.js';
 					}
 				});
 			},
-			scrollToBottom() {
-				const container = document.getElementById('container'); // 替换为你的容器元素ID
-				container.scrollIntoView(false);
+			scroll(e) {
+				this.oldScrollTop = e.detail.scrollTop
+			},
+			goTop(e) {
+				// 解决view层不同步的问题
+				this.scrollTop = this.oldScrollTop
+				this.$nextTick(()=> {
+					this.scrollTop = 10000
+				})
 			},
 			onUnload() {
 				console.log('111beforeDestroy')

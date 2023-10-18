@@ -2,7 +2,7 @@
  * @Author: zhangjinying
  * @Date: 2023-10-09 14:59:58
  * @LastEditors: zhangjinying
- * @LastEditTime: 2023-10-17 16:13:07
+ * @LastEditTime: 2023-10-18 15:45:49
  * @Description: 
  */
 class UniappWebSocket {
@@ -39,6 +39,7 @@ class UniappWebSocket {
     });
 
     this.socket.onClose(() => {
+      console.log('断开了')
 			this.isOpen = false
       this.emit('close');
 			this.listeners = {}
@@ -46,6 +47,7 @@ class UniappWebSocket {
     });
 
     this.socket.onError((error) => {
+      console.log('error了')
       this.emit('error', error);
     });
   }

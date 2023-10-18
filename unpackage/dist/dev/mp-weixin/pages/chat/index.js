@@ -17,7 +17,10 @@ const _sfc_main = {
       avatarUrl: "",
       userId: "",
       nickName: "",
-      ws: null
+      ws: null,
+      scrollTop: 0,
+      oldScrollTop: 0,
+      wsStatus: false
     };
   },
   computed: {
@@ -43,12 +46,21 @@ const _sfc_main = {
             code: event.code
           },
           success: (res) => {
+            if (!res.data || !res.data.data || !res.data.data.token) {
+              common_vendor.index.showToast({
+                title: "登录失败",
+                icon: "error",
+                duration: 2e3
+              });
+              return;
+            }
             this.token = res.data.data.token;
             this.avatarUrl = res.data.data.photoPath || "";
             this.userId = res.data.data.id;
             this.nickName = res.data.data.name || "";
             common_vendor.index.setStorageSync("token", res.data.data.token);
             common_vendor.index.setStorageSync("userId", res.data.data.id);
+            this.initWs();
           },
           fail: (err) => {
             this.msg = `serve-login：${JSON.stringify(err)}`;
@@ -60,7 +72,6 @@ const _sfc_main = {
       }
     });
     this.getHistory();
-    this.initWs();
   },
   methods: {
     getHistory() {
@@ -73,6 +84,7 @@ const _sfc_main = {
         },
         success: (res) => {
           this.messageList = res.data.data;
+          this.goTop();
         },
         fail: (err) => {
           this.msg = `history：${JSON.stringify(err)}`;
@@ -80,7 +92,7 @@ const _sfc_main = {
       });
     },
     initWs() {
-      this.ws = new pages_chat_socket.UniappWebSocket(`${configs_index.configs.ws_location}/eps/ws?room=123`);
+      this.ws = new pages_chat_socket.UniappWebSocket(`${configs_index.configs.ws_location}/eps/ws?room=123&id=${this.userId}`);
       this.ws.on("open", () => {
         console.log("WebSocket连接已打开");
       });
@@ -93,22 +105,38 @@ const _sfc_main = {
             icon: "success",
             duration: 2e3
           });
+          this.wsStatus = true;
         } else if (event === "sendMessage") {
           this.messageList.push(data);
+          this.goTop();
         }
+      });
+      this.ws.on("close", (error) => {
+        console.log("发生错误:", error);
+        this.wsStatus = false;
+        common_vendor.index.showToast({
+          title: "断开了",
+          icon: "error",
+          duration: 3e3
+        });
       });
       this.ws.on("error", (error) => {
         console.log("发生错误:", error);
+        this.wsStatus = false;
       });
     },
     sendClick() {
-      console.log(this.cont);
-      if (!this.cont)
-        return;
+      if (!this.wsStatus) {
+        common_vendor.index.showToast({
+          title: "断开了,只能刷新了...",
+          icon: "error",
+          duration: 3e3
+        });
+      }
       this.ws.sendMessage({
         roomId: 123,
         senderId: this.userId,
-        content: this.cont
+        content: this.cont || "没有识别"
       });
       this.cont = "";
     },
@@ -173,9 +201,14 @@ const _sfc_main = {
         }
       });
     },
-    scrollToBottom() {
-      const container = document.getElementById("container");
-      container.scrollIntoView(false);
+    scroll(e) {
+      this.oldScrollTop = e.detail.scrollTop;
+    },
+    goTop(e) {
+      this.scrollTop = this.oldScrollTop;
+      this.$nextTick(() => {
+        this.scrollTop = 1e4;
+      });
     },
     onUnload() {
       console.log("111beforeDestroy");
@@ -204,27 +237,30 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         })
       };
     }),
-    b: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
-    c: $data.cont,
-    d: common_vendor.o(($event) => $data.cont = $event.detail.value),
-    e: common_vendor.n($data.cont.length ? "active" : ""),
-    f: common_vendor.o($options.sendClick),
-    g: common_vendor.p({
+    b: $data.scrollTop,
+    c: common_vendor.o((...args) => $options.scroll && $options.scroll(...args)),
+    d: common_vendor.o((...args) => $options.confirmClick && $options.confirmClick(...args)),
+    e: $data.cont,
+    f: common_vendor.o(($event) => $data.cont = $event.detail.value),
+    g: common_vendor.n($data.cont.length ? "active" : ""),
+    h: common_vendor.o($options.sendClick),
+    i: common_vendor.p({
       type: "paperplane-filled",
       size: "28"
     }),
-    h: common_vendor.s($options.heightStyle),
-    i: !!$data.avatarUrl,
-    j: common_vendor.o((...args) => $options.joinPopup && $options.joinPopup(...args)),
-    k: !$data.avatarUrl,
-    l: $data.avatarUrl,
-    m: common_vendor.o((...args) => $options.chooseAvatar && $options.chooseAvatar(...args)),
-    n: $data.nickName,
-    o: common_vendor.o((...args) => $options.formsubmit && $options.formsubmit(...args)),
-    p: common_vendor.sr("popup", "5a559478-2"),
-    q: common_vendor.p({
+    j: common_vendor.s($options.heightStyle),
+    k: !!$data.avatarUrl,
+    l: common_vendor.o((...args) => $options.joinPopup && $options.joinPopup(...args)),
+    m: !$data.avatarUrl,
+    n: $data.avatarUrl,
+    o: common_vendor.o((...args) => $options.chooseAvatar && $options.chooseAvatar(...args)),
+    p: $data.nickName,
+    q: common_vendor.o((...args) => $options.formsubmit && $options.formsubmit(...args)),
+    r: common_vendor.sr("popup", "5a559478-2"),
+    s: common_vendor.p({
       type: "bottom"
-    })
+    }),
+    t: $data.userId
   };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-5a559478"], ["__file", "/Users/ajin/Documents/test/uniapp/mygame/pages/chat/index.vue"]]);

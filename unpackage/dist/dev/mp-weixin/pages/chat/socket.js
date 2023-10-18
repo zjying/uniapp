@@ -28,12 +28,14 @@ class UniappWebSocket {
       this.emit("message", res.data);
     });
     this.socket.onClose(() => {
+      console.log("断开了");
       this.isOpen = false;
       this.emit("close");
       this.listeners = {};
       UniappWebSocket.instance = null;
     });
     this.socket.onError((error) => {
+      console.log("error了");
       this.emit("error", error);
     });
   }

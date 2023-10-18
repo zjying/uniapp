@@ -2,14 +2,14 @@
  * @Author: zhangjinying
  * @Date: 2023-09-22 11:09:58
  * @LastEditors: zhangjinying
- * @LastEditTime: 2023-10-17 16:38:46
+ * @LastEditTime: 2023-10-18 15:44:30
  * @Description: 
 -->
 <template>
 	<view :class="['message', +message.senderId === +userId ? 'messagerevise' : '']">
 		<image class="message-header" :src="message.photoPath"></image>
 		<view class="message-content">
-			<view class="message-content-name">{{ message.nickname }} - {{ message.timestamp.replace('T0', ' ') }}</view>
+			<view class="message-content-name">{{ message.nickname }}({{ message.timestamp.replace(/.\d{3}Z/, '').replace('T0', ' ')}})</view>
 			<text class="message-content-cont">{{ message.content }}</text>
 		</view>
 	</view>
@@ -42,11 +42,11 @@
 			height: 45px;
 		}
 		&-content {
-			// flex: 1;
 			margin: 0 10px;
 			height: auto;
 			display: flex;
 			flex-direction: column;
+			align-items: flex-start;
 			align-self: start;
 			
 			&-name {
