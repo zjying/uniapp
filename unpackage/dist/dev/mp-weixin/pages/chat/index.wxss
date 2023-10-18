@@ -8,16 +8,16 @@
   overflow: hidden;
 }
 .chat-record.data-v-5a559478 {
-  padding: 20px;
+  padding: 10px;
   height: 85vh;
   box-sizing: border-box;
-  overflow-y: auto;
-  overflow-x: hidden;
   word-wrap: break-word;
   word-break: break-all;
 }
 .chat .scroll-view_H.data-v-5a559478 {
   height: 85vh;
+  padding: 0 10px;
+  box-sizing: border-box;
 }
 .chat-send.data-v-5a559478 {
   border-top: 1px solid #f2f2f2;

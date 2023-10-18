@@ -50,6 +50,20 @@
 				</form>
 			</div>
 		</uni-popup>
+		<view>
+			<!-- 提示窗示例 -->
+			<uni-popup ref="alertDialog" type="dialog">
+				<uni-popup-dialog
+					type="error"
+					cancelText="不要"
+					confirmText="要"
+					title="通知"
+					content="断开了，要重连么～"
+					@confirm="dialogConfirm"
+					@close="dialogClose">
+				</uni-popup-dialog>
+			</uni-popup>
+		</view>
 	</view>
 </template>
 
@@ -143,7 +157,9 @@ import configs from '@/configs/index.js';
 						},
 						success: (res) => {
 							this.messageList = res.data.data
-							this.goTop()
+							setTimeout(() => {
+								this.goTop()
+							}, 0)
 						},
 						fail: (err) => {
 							this.msg = `history：${JSON.stringify(err)}`
@@ -176,11 +192,12 @@ import configs from '@/configs/index.js';
 				this.ws.on('close', (error) => {
 				  console.log('发生错误:', error);
 					this.wsStatus = false
-					uni.showToast({
-						title: "断开了",
-						icon: "error",
-						duration: 3000
-					})
+					this.$refs.alertDialog.open()
+					// uni.showToast({
+					// 	title: "断开了",
+					// 	icon: "error",
+					// 	duration: 3000
+					// })
 				});
 				this.ws.on('error', (error) => {
 				  console.log('发生错误:', error);
@@ -188,18 +205,15 @@ import configs from '@/configs/index.js';
 				});
 			},
 			sendClick() {
-				// if (!this.cont) return
+				if (!this.cont) return
 				if (!this.wsStatus) {
-					uni.showToast({
-						title: "断开了,只能刷新了...",
-						icon: "error",
-						duration: 3000
-					})
+					this.$refs.alertDialog.open()
+					return
 				}
 				this.ws.sendMessage({
 					roomId: 123,
 					senderId: this.userId,
-					content: this.cont || '没有识别'
+					content: this.cont
 				})
 				this.cont = ''
 			},
@@ -282,6 +296,13 @@ import configs from '@/configs/index.js';
 			onUnload() {
 				console.log('111beforeDestroy')
 				this.ws.close();
+			},
+			dialogConfirm() {
+				this.$refs.alertDialog.close()
+				this.initWs()
+			},
+			dialogClose() {
+				this.$refs.alertDialog.close()
 			}
 		}
 	}

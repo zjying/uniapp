@@ -84,7 +84,9 @@ const _sfc_main = {
         },
         success: (res) => {
           this.messageList = res.data.data;
-          this.goTop();
+          setTimeout(() => {
+            this.goTop();
+          }, 0);
         },
         fail: (err) => {
           this.msg = `history：${JSON.stringify(err)}`;
@@ -114,11 +116,7 @@ const _sfc_main = {
       this.ws.on("close", (error) => {
         console.log("发生错误:", error);
         this.wsStatus = false;
-        common_vendor.index.showToast({
-          title: "断开了",
-          icon: "error",
-          duration: 3e3
-        });
+        this.$refs.alertDialog.open();
       });
       this.ws.on("error", (error) => {
         console.log("发生错误:", error);
@@ -126,17 +124,16 @@ const _sfc_main = {
       });
     },
     sendClick() {
+      if (!this.cont)
+        return;
       if (!this.wsStatus) {
-        common_vendor.index.showToast({
-          title: "断开了,只能刷新了...",
-          icon: "error",
-          duration: 3e3
-        });
+        this.$refs.alertDialog.open();
+        return;
       }
       this.ws.sendMessage({
         roomId: 123,
         senderId: this.userId,
-        content: this.cont || "没有识别"
+        content: this.cont
       });
       this.cont = "";
     },
@@ -213,6 +210,13 @@ const _sfc_main = {
     onUnload() {
       console.log("111beforeDestroy");
       this.ws.close();
+    },
+    dialogConfirm() {
+      this.$refs.alertDialog.close();
+      this.initWs();
+    },
+    dialogClose() {
+      this.$refs.alertDialog.close();
     }
   }
 };
@@ -220,12 +224,14 @@ if (!Array) {
   const _component_message = common_vendor.resolveComponent("message");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
-  (_component_message + _easycom_uni_icons2 + _easycom_uni_popup2)();
+  const _easycom_uni_popup_dialog2 = common_vendor.resolveComponent("uni-popup-dialog");
+  (_component_message + _easycom_uni_icons2 + _easycom_uni_popup2 + _easycom_uni_popup_dialog2)();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_popup = () => "../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
+const _easycom_uni_popup_dialog = () => "../../uni_modules/uni-popup/components/uni-popup-dialog/uni-popup-dialog.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_uni_popup)();
+  (_easycom_uni_icons + _easycom_uni_popup + _easycom_uni_popup_dialog)();
 }
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
@@ -260,7 +266,20 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     s: common_vendor.p({
       type: "bottom"
     }),
-    t: $data.userId
+    t: common_vendor.o($options.dialogConfirm),
+    v: common_vendor.o($options.dialogClose),
+    w: common_vendor.p({
+      type: "error",
+      cancelText: "不要",
+      confirmText: "要",
+      title: "通知",
+      content: "断开了，要重连么～"
+    }),
+    x: common_vendor.sr("alertDialog", "5a559478-3"),
+    y: common_vendor.p({
+      type: "dialog"
+    }),
+    z: $data.userId
   };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-5a559478"], ["__file", "/Users/ajin/Documents/test/uniapp/mygame/pages/chat/index.vue"]]);
