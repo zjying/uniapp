@@ -111,7 +111,7 @@ import configs from '@/configs/index.js';
 			 	success: (event) => {
 			 		//客户端成功获取授权临时票据（code）,向业务服务器发起登录请求。
 			 		uni.request({
-			 		    url: `${configs.api_location}/eps/login`, //仅为示例，并非真实接口地址。
+			 		    url: `${configs.api_location}/login`, //仅为示例，并非真实接口地址。
 			 		    data: {
 			 		        code: event.code
 			 		    },
@@ -150,7 +150,7 @@ import configs from '@/configs/index.js';
 			getHistory() {
 				//客户端成功获取授权临时票据（code）,向业务服务器发起登录请求。
 				uni.request({
-						url: `${configs.api_location}/eps/chat/history`, //仅为示例，并非真实接口地址。
+						url: `${configs.api_location}/chat/history`, //仅为示例，并非真实接口地址。
 						method: 'POST',
 						data: {
 								roomId: 123
@@ -168,7 +168,7 @@ import configs from '@/configs/index.js';
 			},
 			initWs() {
 				// 使用示例
-				this.ws = new UniappWebSocket(`${configs.ws_location}/eps/ws?room=123&id=${this.userId}`);
+				this.ws = new UniappWebSocket(`${configs.ws_location}/ws?room=123&id=${this.userId}`);
 				
 				this.ws.on('open', () => {
 				  console.log('WebSocket连接已打开');
@@ -263,7 +263,7 @@ import configs from '@/configs/index.js';
 			},
 			uploadAvatar() {
 				uni.uploadFile({
-					url: `${configs.api_location}/eps/upload`,
+					url: `${configs.api_location}/upload`,
 					filePath: this.avatarUrl,
 					name: 'file',
 					header: {

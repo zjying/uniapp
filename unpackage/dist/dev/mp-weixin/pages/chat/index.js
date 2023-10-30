@@ -40,7 +40,7 @@ const _sfc_main = {
       // 微信登录仅请求授权认证
       success: (event) => {
         common_vendor.index.request({
-          url: `${configs_index.configs.api_location}/eps/login`,
+          url: `${configs_index.configs.api_location}/login`,
           //仅为示例，并非真实接口地址。
           data: {
             code: event.code
@@ -76,7 +76,7 @@ const _sfc_main = {
   methods: {
     getHistory() {
       common_vendor.index.request({
-        url: `${configs_index.configs.api_location}/eps/chat/history`,
+        url: `${configs_index.configs.api_location}/chat/history`,
         //仅为示例，并非真实接口地址。
         method: "POST",
         data: {
@@ -94,7 +94,7 @@ const _sfc_main = {
       });
     },
     initWs() {
-      this.ws = new pages_chat_socket.UniappWebSocket(`${configs_index.configs.ws_location}/eps/ws?room=123&id=${this.userId}`);
+      this.ws = new pages_chat_socket.UniappWebSocket(`${configs_index.configs.ws_location}/ws?room=123&id=${this.userId}`);
       this.ws.on("open", () => {
         console.log("WebSocket连接已打开");
       });
@@ -180,7 +180,7 @@ const _sfc_main = {
     },
     uploadAvatar() {
       common_vendor.index.uploadFile({
-        url: `${configs_index.configs.api_location}/eps/upload`,
+        url: `${configs_index.configs.api_location}/upload`,
         filePath: this.avatarUrl,
         name: "file",
         header: {
